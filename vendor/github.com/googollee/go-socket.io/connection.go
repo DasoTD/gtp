@@ -84,7 +84,7 @@ func (c *conn) connect() error {
 	root := newNamespaceConn(c, aliasRootNamespace, rootHandler.broadcast)
 	c.namespaces.Set(rootNamespace, root)
 
-	root.Join(root.ID())
+	root.Join(root.Conn.ID())
 
 	c.namespaces.Range(func(ns string, nc *namespaceConn) {
 		nc.SetContext(c.Conn.Context())
@@ -143,8 +143,4 @@ func (c *conn) onError(namespace string, err error) {
 func (c *conn) namespace(nsp string) *namespaceHandler {
 	handler, _ := c.handlers.Get(nsp)
 	return handler
-}
-
-func (c *conn) parseArgs(types []reflect.Type) ([]reflect.Value, error) {
-	return c.decoder.DecodeArgs(types)
 }

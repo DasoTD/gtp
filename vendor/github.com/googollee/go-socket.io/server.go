@@ -7,6 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 
 	"github.com/googollee/go-socket.io/engineio"
+	"github.com/googollee/go-socket.io/logger"
 	"github.com/googollee/go-socket.io/parser"
 )
 
@@ -45,8 +46,7 @@ func (s *Server) Adapter(opts *RedisAdapterOptions) (bool, error) {
 
 	s.redisAdapter = opts
 
-	conn.Close()
-	return true, nil
+	return true, conn.Close()
 }
 
 // Close closes server.
@@ -203,6 +203,11 @@ func (s *Server) Count() int {
 	return s.engine.Count()
 }
 
+// Remove session from sessions pool. Fixed the sessions map leak(connections, mem).
+func (s *Server) Remove(sid string) {
+	s.engine.Remove(sid)
+}
+
 // ForEach sends data by DataFunc, if room does not exit sends anything.
 func (s *Server) ForEach(namespace string, room string, f EachFunc) bool {
 	nspHandler := s.getNamespace(namespace)
@@ -232,8 +237,11 @@ func (s *Server) serveConn(conn engineio.Conn) {
 
 func (s *Server) serveError(c *conn) {
 	defer func() {
-		c.Close()
-		s.engine.Remove(c.ID())
+		if err := c.Close(); err != nil {
+			logger.Error("close connect:", err)
+		}
+
+		s.engine.Remove(c.Conn.ID())
 	}()
 
 	for {
@@ -261,8 +269,11 @@ func (s *Server) serveError(c *conn) {
 
 func (s *Server) serveWrite(c *conn) {
 	defer func() {
-		c.Close()
-		s.engine.Remove(c.ID())
+		if err := c.Close(); err != nil {
+			logger.Error("close connect:", err)
+		}
+
+		s.engine.Remove(c.Conn.ID())
 	}()
 
 	for {
@@ -279,8 +290,11 @@ func (s *Server) serveWrite(c *conn) {
 
 func (s *Server) serveRead(c *conn) {
 	defer func() {
-		c.Close()
-		s.engine.Remove(c.ID())
+		if err := c.Close(); err != nil {
+			logger.Error("close connect:", err)
+		}
+
+		s.engine.Remove(c.Conn.ID())
 	}()
 
 	var event string
@@ -289,6 +303,7 @@ func (s *Server) serveRead(c *conn) {
 		var header parser.Header
 
 		if err := c.decoder.DecodeHeader(&header, &event); err != nil {
+			logger.Error("DecodeHeader Error in serveRead", err)
 			c.onError(rootNamespace, err)
 			return
 		}
@@ -299,18 +314,19 @@ func (s *Server) serveRead(c *conn) {
 
 		var err error
 		switch header.Type {
-		case parser.Ack, parser.Connect, parser.Disconnect:
-			handler, ok := readHandlerMapping[header.Type]
-			if !ok {
-				return
-			}
-
-			err = handler(c, header)
+		case parser.Ack:
+			err = ackPacketHandler(c, header)
+		case parser.Connect:
+			err = connectPacketHandler(c, header)
+		case parser.Disconnect:
+			err = disconnectPacketHandler(c, header)
 		case parser.Event:
 			err = eventPacketHandler(c, event, header)
 		}
 
 		if err != nil {
+			logger.Error("serve read:", err)
+
 			return
 		}
 	}

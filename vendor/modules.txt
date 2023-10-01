@@ -4,7 +4,7 @@ github.com/gofrs/uuid
 # github.com/gomodule/redigo v1.8.9
 ## explicit; go 1.16
 github.com/gomodule/redigo/redis
-# github.com/googollee/go-socket.io v1.7.0
+# github.com/googollee/go-socket.io v1.8.0-rc.1.0.20230904084053-b044011d047b
 ## explicit; go 1.16
 github.com/googollee/go-socket.io
 github.com/googollee/go-socket.io/engineio
@@ -16,7 +16,15 @@ github.com/googollee/go-socket.io/engineio/transport
 github.com/googollee/go-socket.io/engineio/transport/polling
 github.com/googollee/go-socket.io/engineio/transport/utils
 github.com/googollee/go-socket.io/engineio/transport/websocket
+github.com/googollee/go-socket.io/logger
 github.com/googollee/go-socket.io/parser
 # github.com/gorilla/websocket v1.5.0
 ## explicit; go 1.12
 github.com/gorilla/websocket
+# golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
+## explicit; go 1.20
+golang.org/x/exp/constraints
+golang.org/x/exp/slices
+golang.org/x/exp/slog
+golang.org/x/exp/slog/internal
+golang.org/x/exp/slog/internal/buffer

@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/googollee/go-socket.io/logger"
 	"github.com/gorilla/websocket"
 
 	"github.com/googollee/go-socket.io/engineio/frame"
@@ -63,7 +64,7 @@ func newRcWrapper(l *sync.Mutex, r io.Reader) rcWrapper {
 		select {
 		case <-q:
 		case <-timer.C:
-			fmt.Println("Did you forget to Close() the ReadCloser from NextReader?")
+			logger.Error("Did you forget to Close() the ReadCloser from NextReader?", fmt.Errorf("ConnectionNotClosed"))
 		}
 	}()
 
@@ -128,7 +129,7 @@ func newWcWrapper(l *sync.Mutex, w io.WriteCloser) wcWrapper {
 		select {
 		case <-chQuit:
 		case <-timer.C:
-			fmt.Println("Did you forget to Close() the WriteCloser from NextWriter?")
+			logger.Error("Did you forget to Close() the WriteCloser from NextWriter?", fmt.Errorf("ConnectionNotClosed"))
 		}
 	}()
 
