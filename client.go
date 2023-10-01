@@ -1,19 +1,20 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	// "log"
 
 	socketio "github.com/googollee/go-socket.io"
 )
 
-func client(uri string) {
-	// uri := "http://127.0.0.1:8000"
+func main() {
+	uri := "http://127.0.0.1:8000"
 
 	client, _ := socketio.NewClient(uri, nil)
 
 	// Handle an incoming event
 	client.OnEvent("reply", func(s socketio.Conn, msg string) {
-		log.Println("Receive Message /reply: ", "reply", msg)
+		fmt.Println("Receive Message /reply: ", "reply", msg)
 	})
 
 	client.Connect()
