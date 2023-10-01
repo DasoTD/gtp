@@ -6,8 +6,8 @@ import (
 	socketio "github.com/googollee/go-socket.io"
 )
 
-func client(url string) {
-	uri := "http://127.0.0.1:8000"
+func client(uri string) {
+	// uri := "http://127.0.0.1:8000"
 
 	client, _ := socketio.NewClient(uri, nil)
 
